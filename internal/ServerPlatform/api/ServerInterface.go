@@ -1,4 +1,4 @@
-package Server_Interface
+package ServerCoreApi
 
 type ServerInterface interface {
 	Start() error

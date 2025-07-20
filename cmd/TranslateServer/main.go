@@ -1,12 +1,9 @@
 package main
 
 import (
-	"TranslateServer/internal/ServerCore"
+	"TranslateServer/internal/ServerPlatform"
 )
 
 func main() {
-	server := Server_Core.NewServer()
-	if err := server.Start(); err != nil {
-		panic(err)
-	}
+	ServerPlatform.Run()
 }
