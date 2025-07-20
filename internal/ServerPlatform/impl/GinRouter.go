@@ -21,7 +21,7 @@ func (r *GinRouter) Run(addr ...string) error {
 
 func (r *GinRouter) GET(path string, handler func(c ServerCoreApi.HandlerInterface)) {
 	r.engine.GET(path, func(c *gin.Context) {
-		ginContext := &GinContext{Context: c}
+		ginContext := &GinContextHandler{Context: c}
 		handler(ginContext)
 	})
 }

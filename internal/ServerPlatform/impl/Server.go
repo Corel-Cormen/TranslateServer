@@ -11,7 +11,7 @@ type Server struct {
 	router 	ServerCoreApi.RoutherInterface
 }
 
-func NewServer(address string, port int, router ServerCoreApi.RoutherInterface) *Server {
+func NewServer(address string, port int, router ServerCoreApi.RoutherInterface) ServerCoreApi.ServerInterface {
 	return &Server{
 		address: address,
 		port:    port,
