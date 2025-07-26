@@ -1,0 +1,79 @@
+FROM ubuntu:22.04
+
+LABEL maintainer="Corel-Cormen <"
+LABEL description="Dockerfile for using Translate Server."
+LABEL version="1.0"
+LABEL license="MIT"
+
+RUN apt-get update && \
+    apt-get install -y \
+    vim \
+    curl \
+    wget \
+    unzip \
+    git \
+    cmake \
+    g++ \
+    gcc \
+    build-essential \
+    libboost-all-dev \
+    libprotobuf-dev \
+    protobuf-compiler \
+    libopenblas-dev \
+    libhdf5-dev \
+    libyaml-cpp-dev \
+    libtcmalloc-minimal4 \
+    libgoogle-glog-dev \
+    libgflags-dev \
+    liblzma-dev \
+    libzip-dev \
+    zlib1g-dev \
+    python3 \
+    python3-pip && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install Marian dependencies (CUDA)
+ENV CUDA_VERSION=12.9.1
+ENV CUDA_DRIVER_VERSION=575.57.08
+ENV CUDA_INSTALLER=cuda_${CUDA_VERSION}_${CUDA_DRIVER_VERSION}_linux.run
+ENV CUDA_INSTALL_PATH=/usr/local/cuda-${CUDA_VERSION}
+
+RUN wget https://developer.download.nvidia.com/compute/cuda/${CUDA_VERSION}/local_installers/${CUDA_INSTALLER}
+RUN sh ${CUDA_INSTALLER} --silent --toolkit --override --installpath=${CUDA_INSTALL_PATH}
+RUN rm ${CUDA_INSTALLER}
+
+# Install Marian
+ENV MARIAN_VERSION=1.12.0
+
+WORKDIR /opt
+RUN git clone https://github.com/marian-nmt/marian.git
+WORKDIR /opt/marian
+RUN git checkout ${MARIAN_VERSION}
+RUN mkdir build
+WORKDIR /opt/marian/build
+RUN cmake -DCOMPILE_CUDA=ON -DUSE_NCC=OFF ..
+RUN make -j8
+RUN mkdir -p /opt/marian-dev/bin
+RUN cp marian-decoder /opt/marian-dev/bin
+WORKDIR /opt
+RUN rm -rf marian
+
+ENV PATH="/opt/marian-dev/bin:$PATH"
+
+# Install vocabulary
+ENV OPUS_VERSION=2021-04-14
+
+WORKDIR /opt
+RUN wget https://object.pouta.csc.fi/Tatoeba-MT-models/eng-pol/opus+bt-${OPUS_VERSION}.zip
+RUN unzip opus+bt-${OPUS_VERSION}.zip -d /opt/marian-dev/vocab
+RUN rm opus+bt-${OPUS_VERSION}.zip
+
+# Install Golang
+ENV GOLANG_VERSION=1.24.5
+ENV GOLANG_ARCHIVE=go${GOLANG_VERSION}.linux-amd64.tar.gz
+
+RUN wget https://go.dev/dl/${GOLANG_ARCHIVE} && \
+    tar -C /usr/local -xzf ${GOLANG_ARCHIVE} && \
+    rm ${GOLANG_ARCHIVE}
+
+ENV PATH="/usr/local/go/bin:${PATH}"
