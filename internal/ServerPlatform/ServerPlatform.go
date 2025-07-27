@@ -1,12 +1,11 @@
 package ServerPlatform
 
 import (
-	"TranslateServer/internal/ServerPlatform/impl"
+	"TranslateServer/internal/ServerPlatform/instance"
 )
 
 func Run() {
-	router := ServerCore.NewGinRouter()
-	server := ServerCore.NewServer("0.0.0.0", 5000, router)
+	server := ServerPlatformInstance.GetServer()
 	if err := server.Start(); err != nil {
 		panic(err)
 	}

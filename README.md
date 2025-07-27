@@ -1,3 +1,6 @@
+Release script:
+./ci-script.sh
+
 budowa dockera:
 
 docker buildx build -t translate_server_image -f dockerfile .
