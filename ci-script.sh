@@ -8,10 +8,16 @@ set -e
 buildDir="build/out"
 binaryDir="$buildDir/TranslateServer"
 
+echo "--- Building TranslateServer application ---"
+
 go build -o $binaryDir cmd/TranslateServer/main.go
+
+echo "--- Build completed successfully ---"
 
 testPath="$buildDir/unit-test"
 coveragePath="$testPath/coverage.out"
+
+echo "--- Running tests and generating coverage report ---"
 
 mkdir -p $testPath
 go test -v -shuffle on ./... -coverprofile=$coveragePath
