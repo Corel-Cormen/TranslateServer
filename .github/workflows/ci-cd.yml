@@ -1,0 +1,45 @@
+name: Release build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.18'
+
+      - name: Install dependencies
+        run: go mod tidy
+
+      - name: Run build script
+        run: |
+          chmod +x ./ci-script.sh
+          ./ci-script.sh
+
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: translate-server-binary
+          path: build/out/TranslateServer/main
+
+      - name: Upload test coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-coverage-reports
+          path: |
+            build/out/unit-test/coverage.out
+            build/out/unit-test/coverage.txt
+            build/out/unit-test/coverage.html

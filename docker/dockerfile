@@ -1,0 +1,183 @@
+# ========================
+# GLOBAL ARGUMENTS
+# ========================
+
+# This code is generated, do not edit manually
+# Start source .env
+ARG MARIAN_INSTALL_PATH="/opt/marian-dev/bin"
+ARG VOCAB_PATH="/opt/marian-dev/vocab/opus"
+ARG VOCAB_BT_PATH="/opt/marian-dev/vocab/opus_bt"
+# End source .env
+
+# Start source version_setup_variables.sh
+ARG MARIAN_VERSION=1.12.0
+ARG CUDA_DRIVER_VERSION_MAJOR=575
+ARG CUDA_VERSION_MINOR=9
+ARG CUDA_DRIVER_VERSION_MINOR=57
+ARG OPUS_BT_VERSION=2021-04-14
+ARG CUDA_RELEASE_VERSION=12.9.1
+ARG OPUS_VERSION=2021-02-19
+ARG CUDA_VERSION=12-9
+ARG OPUS_LANG=eng-pol
+ARG CUDA_DRIVER_VERSION_PATH=575.57.08-1
+ARG CUDA_INSTALL_PATH=/usr/local/cuda-12-9
+ARG CUDA_VERSION_RC=1
+ARG CUDA_DRIVER_VERSION_RC=08
+ARG CUDA_DRIVER_VERSION=575.57.08
+ARG CUDA_VERSION_MAJOR=12
+# End source version_setup_variables.sh
+# End code generated
+
+# ========================
+# STAGE 1: BUILD MARIAN
+# ========================
+FROM ubuntu:22.04 AS builder
+
+LABEL stage="builder"
+
+# This code is generated, do not edit manually
+# Start source .env
+ARG MARIAN_INSTALL_PATH="/opt/marian-dev/bin"
+ARG VOCAB_PATH="/opt/marian-dev/vocab/opus"
+ARG VOCAB_BT_PATH="/opt/marian-dev/vocab/opus_bt"
+# End source .env
+
+# Start source version_setup_variables.sh
+ARG MARIAN_VERSION=1.12.0
+ARG CUDA_DRIVER_VERSION_MAJOR=575
+ARG CUDA_VERSION_MINOR=9
+ARG CUDA_DRIVER_VERSION_MINOR=57
+ARG OPUS_BT_VERSION=2021-04-14
+ARG CUDA_RELEASE_VERSION=12.9.1
+ARG OPUS_VERSION=2021-02-19
+ARG CUDA_VERSION=12-9
+ARG OPUS_LANG=eng-pol
+ARG CUDA_DRIVER_VERSION_PATH=575.57.08-1
+ARG CUDA_INSTALL_PATH=/usr/local/cuda-12-9
+ARG CUDA_VERSION_RC=1
+ARG CUDA_DRIVER_VERSION_RC=08
+ARG CUDA_DRIVER_VERSION=575.57.08
+ARG CUDA_VERSION_MAJOR=12
+# End source version_setup_variables.sh
+# End code generated
+
+# Podstawowe zależności do kompilacji
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    vim \
+    curl \
+    wget \
+    unzip \
+    git \
+    cmake \
+    g++ \
+    gcc \
+    make \
+    build-essential \
+    libboost-all-dev \
+    libprotobuf-dev \
+    protobuf-compiler \
+    libopenblas-dev \
+    libhdf5-dev \
+    libyaml-cpp-dev \
+    libtcmalloc-minimal4 \
+    libgoogle-glog-dev \
+    libgflags-dev \
+    liblzma-dev \
+    libzip-dev \
+    zlib1g-dev \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /opt
+
+# Install CUDA
+ARG CUDA_INSTALLER=cuda_${CUDA_RELEASE_VERSION}_${CUDA_DRIVER_VERSION}_linux.run
+
+RUN wget -O ${CUDA_INSTALLER} https://developer.download.nvidia.com/compute/cuda/${CUDA_RELEASE_VERSION}/local_installers/${CUDA_INSTALLER} && \
+    sh ./${CUDA_INSTALLER} --silent --toolkit --override --installpath=${CUDA_INSTALL_PATH} && \
+    rm ${CUDA_INSTALLER}
+
+ENV PATH="${CUDA_INSTALL_PATH}/bin:${PATH}"
+
+# Install Marian
+RUN git clone https://github.com/marian-nmt/marian.git
+WORKDIR /opt/marian
+RUN git checkout ${MARIAN_VERSION} && mkdir build
+WORKDIR /opt/marian/build
+RUN cmake -DCOMPILE_CUDA=ON -DUSE_NCC=OFF -DCMAKE_BUILD_TYPE=Release .. && \
+    make -j8 && \
+    mkdir -p ${MARIAN_INSTALL_PATH} && \
+    cp marian-decoder ${MARIAN_INSTALL_PATH} && \
+    strip ${MARIAN_INSTALL_PATH}/marian-decoder
+WORKDIR /opt
+
+# Install Vocabulary
+ARG OPUS_BT_ARCHIVE=opus+bt-${OPUS_BT_VERSION}.zip
+ARG OPUS_ARCHIVE=opus-${OPUS_VERSION}.zip
+
+RUN mkdir -p ${VOCAB_PATH}
+RUN wget https://object.pouta.csc.fi/Tatoeba-MT-models/${OPUS_LANG}/${OPUS_BT_ARCHIVE} && \
+    mkdir -p ${VOCAB_BT_PATH} && \
+    unzip ${OPUS_BT_ARCHIVE} -d ${VOCAB_BT_PATH} && \
+    chown -R $SUDO_USER:$SUDO_USER ${VOCAB_BT_PATH}
+
+RUN wget https://object.pouta.csc.fi/Tatoeba-MT-models/${OPUS_LANG}/${OPUS_ARCHIVE} && \
+    mkdir -p ${VOCAB_PATH} && \
+    unzip ${OPUS_ARCHIVE} -d ${VOCAB_PATH} && \
+    chown -R $SUDO_USER:$SUDO_USER ${VOCAB_PATH}
+
+# ========================
+# STAGE 2: FINAL RUNTIME
+# ========================
+FROM nvidia/cuda:${CUDA_RELEASE_VERSION}-runtime-ubuntu22.04 AS final
+
+LABEL maintainer="Corel-Cormen <"
+LABEL description="Slim Translate Server using Marian NMT"
+LABEL version="1.0"
+LABEL license="MIT"
+
+# This code is generated, do not edit manually
+# Start source .env
+ARG MARIAN_INSTALL_PATH="/opt/marian-dev/bin"
+ARG VOCAB_PATH="/opt/marian-dev/vocab/opus"
+ARG VOCAB_BT_PATH="/opt/marian-dev/vocab/opus_bt"
+# End source .env
+
+# Start source version_setup_variables.sh
+ARG MARIAN_VERSION=1.12.0
+ARG CUDA_DRIVER_VERSION_MAJOR=575
+ARG CUDA_VERSION_MINOR=9
+ARG CUDA_DRIVER_VERSION_MINOR=57
+ARG OPUS_BT_VERSION=2021-04-14
+ARG CUDA_RELEASE_VERSION=12.9.1
+ARG OPUS_VERSION=2021-02-19
+ARG CUDA_VERSION=12-9
+ARG OPUS_LANG=eng-pol
+ARG CUDA_DRIVER_VERSION_PATH=575.57.08-1
+ARG CUDA_INSTALL_PATH=/usr/local/cuda-12-9
+ARG CUDA_VERSION_RC=1
+ARG CUDA_DRIVER_VERSION_RC=08
+ARG CUDA_DRIVER_VERSION=575.57.08
+ARG CUDA_VERSION_MAJOR=12
+# End source version_setup_variables.sh
+# End code generated
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libboost-all-dev \
+    libprotobuf-dev \
+    libtcmalloc-minimal4 \
+    libgoogle-glog-dev \
+    libgflags-dev \
+    libopenblas-dev \
+    libyaml-cpp-dev \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder ${MARIAN_INSTALL_PATH} ${MARIAN_INSTALL_PATH}
+COPY --from=builder ${CUDA_INSTALL_PATH} ${CUDA_INSTALL_PATH}
+COPY --from=builder ${VOCAB_BT_PATH} ${VOCAB_BT_PATH}
+COPY --from=builder ${VOCAB_PATH} ${VOCAB_PATH}
+
+ENV MARIAN_INSTALL_PATH=${MARIAN_INSTALL_PATH}
+ENV VOCAB_BT_PATH=${VOCAB_BT_PATH}
+ENV VOCAB_PATH=${VOCAB_PATH}
