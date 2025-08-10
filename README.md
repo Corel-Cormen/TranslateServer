@@ -78,3 +78,23 @@ echo "Jack would like buy a new car ." > input.txt
 docker run --gpus all -v C:\Users\K\Desktop\TS:/data translate_server_image:latest /opt/marian-dev/bin/marian-decoder -m /opt/marian-dev/vocab/opus_bt/opus+bt.spm32k-spm32k.transformer-align.model1.npz.best-perplexity.npz -v /opt/marian-dev/vocab/opus_bt/opus+bt.spm32k-spm32k.vocab.yml /opt/marian-dev/vocab/opus_bt/opus+bt.spm32k-spm32k.vocab.yml -i /data/input.txt -o /data/output.txt
 
 ./marian-decoder -m /opt/marian-dev/vocab/opus/opus.spm32k-spm32k.transformer.model1.npz.best-perplexity.npz -v /opt/marian-dev/vocab/opus/opus.spm32k-spm32k.vocab.yml /opt/marian-dev/vocab/opus/opus.spm32k-spm32k.vocab.yml -i input.txt -o output.txt
+
+{
+echo "digraph G {"
+modulePath=$(go list -m)
+prefixToCut="$modulePath/internal/"
+go list -f '{{.ImportPath}} {{join .Imports " "}}' ./... \
+| while read pkg imports; do
+if [[ $pkg == *"/mock"* ]]; then
+continue
+fi
+shortPkg=${pkg#$prefixToCut}
+for imp in $imports; do
+if [[ $imp == $modulePath* && $imp != *"/mock"* ]]; then
+shortImp=${imp#$prefixToCut}
+echo "\"$shortPkg\" -> \"$shortImp\""
+fi
+done
+done
+echo "}"
+} | dot -Tpng -o local_deps.png

@@ -1,5 +1,7 @@
 package ServerCoreApi
 
 type HandlerInterface interface {
-	Callback(code int, obj interface{})
+	TextCallback(code int, obj interface{})
+	JsonCallback(code int, obj interface{})
+	BindJSON(obj interface{}) error
 }

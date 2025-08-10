@@ -5,9 +5,18 @@ import (
 )
 
 type MockServerInterface struct {
-    mock.Mock
+	mock.Mock
 }
 
-func (m *MockServerInterface) Callback(code int, obj interface{}) {
-    m.Called(code, obj)
+func (m *MockServerInterface) TextCallback(code int, obj interface{}) {
+	m.Called(code, obj)
+}
+
+func (m *MockServerInterface) JsonCallback(code int, obj interface{}) {
+	m.Called(code, obj)
+}
+
+func (m *MockServerInterface) BindJSON(obj interface{}) error {
+	args := m.Called(obj)
+	return args.Error(0)
 }

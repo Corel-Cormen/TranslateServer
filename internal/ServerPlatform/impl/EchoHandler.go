@@ -9,5 +9,5 @@ import (
 type EchoHandler struct{}
 
 func (h *EchoHandler) Handle(handler ServerCoreApi.HandlerInterface) {
-	handler.Callback(http.StatusOK, "echo")
+	handler.TextCallback(http.StatusOK, "echo")
 }

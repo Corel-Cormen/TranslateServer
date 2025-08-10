@@ -155,3 +155,16 @@ func TestEnvReader_Read_EnvNotFound(t *testing.T) {
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "environment variable MISSING_VAR not found")
 }
+
+func TestEnvReader_Read_VariableWithApostrophe(t *testing.T) {
+	mockOS := new(MockOsPlatformApi.MockOsInterface)
+	envPath := ".env"
+
+	mockOS.On("LookupEnv", "VAR1").Return("\"value1\"", true)
+
+	reader := NewEnvReader(envPath, mockOS)
+	val, err := reader.Read("VAR1")
+
+	assert.NoError(t, err)
+	assert.Equal(t, "value1", val)
+}

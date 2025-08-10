@@ -25,3 +25,10 @@ func (r *GinRouter) GET(path string, handler func(c ServerCoreApi.HandlerInterfa
 		handler(ginContext)
 	})
 }
+
+func (r *GinRouter) POST(path string, handler func(c ServerCoreApi.HandlerInterface)) {
+	r.engine.POST(path, func(c *gin.Context) {
+		ginContext := &GinContextHandler{Context: c}
+		handler(ginContext)
+	})
+}

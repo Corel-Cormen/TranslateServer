@@ -5,6 +5,7 @@ import (
 
 	"TranslateServer/internal/ServerPlatform/api"
 	"TranslateServer/internal/ServerPlatform/impl"
+	"TranslateServer/internal/Translator/instance"
 )
 
 var (
@@ -25,7 +26,7 @@ func GetServer() ServerCoreApi.ServerInterface {
 	onceServer.Do(func() {
 		addr := "0.0.0.0"
 		port := 5000
-		serverInstance = ServerCore.NewServer(addr, port, getRouter())
+		serverInstance = ServerCore.NewServer(addr, port, getRouter(), TranslatorInstance.GetTranslatorInstance())
 	})
 	return serverInstance
 }

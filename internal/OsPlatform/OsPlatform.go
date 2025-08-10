@@ -2,9 +2,9 @@ package OsPlatform
 
 import (
 	"TranslateServer/internal/OsPlatform/api"
-	"TranslateServer/internal/OsPlatform/impl"
+	"TranslateServer/internal/OsPlatform/instance"
 )
 
 func GetOsInstance() OsPlatformApi.OsInterface {
-	return &OsPlatformImpl.OsFacade{}
+	return OsInstance.GetOsInstance()
 }

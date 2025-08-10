@@ -1,16 +1,20 @@
 package MockServerInterface
 
 import (
-	"github.com/stretchr/testify/mock"
 	"TranslateServer/internal/ServerPlatform/api"
+	"github.com/stretchr/testify/mock"
 )
 
 type MockRouterInterface struct {
-    mock.Mock
+	mock.Mock
 }
 
 func (m *MockRouterInterface) GET(path string, handler func(ServerCoreApi.HandlerInterface)) {
-    m.Called(path, handler)
+	m.Called(path, handler)
+}
+
+func (m *MockRouterInterface) POST(path string, handler func(ServerCoreApi.HandlerInterface)) {
+	m.Called(path, handler)
 }
 
 func (m *MockRouterInterface) Run(addr ...string) error {

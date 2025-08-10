@@ -1,10 +1,11 @@
 package ConfigInstance
 
 import (
+	"sync"
+
 	"TranslateServer/internal/Config/api"
 	"TranslateServer/internal/Config/impl"
 	"TranslateServer/internal/OsPlatform"
-	"sync"
 )
 
 var (

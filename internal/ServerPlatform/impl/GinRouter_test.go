@@ -16,14 +16,31 @@ func TestGinRouter_GETRequestShouldCallHandler(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	mockHandler := new(MockServerInterface.MockServerInterface)
-	mockHandler.On("Callback", http.StatusOK, "ok").Return()
+	mockHandler.On("TextCallback", http.StatusOK, "ok").Return()
 
 	router := NewGinRouter()
 	router.GET("/test", func(c ServerCoreApi.HandlerInterface) {
-		mockHandler.Callback(http.StatusOK, "ok")
+		mockHandler.TextCallback(http.StatusOK, "ok")
 	})
 
 	req := httptest.NewRequest("GET", "/test", nil)
+	w := httptest.NewRecorder()
+
+	router.engine.ServeHTTP(w, req)
+}
+
+func TestGinRouter_POSTRequestShouldCallHandler(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockHandler := new(MockServerInterface.MockServerInterface)
+	mockHandler.On("JsonCallback", http.StatusOK, "ok").Return()
+
+	router := NewGinRouter()
+	router.POST("/test", func(c ServerCoreApi.HandlerInterface) {
+		mockHandler.JsonCallback(http.StatusOK, "ok")
+	})
+
+	req := httptest.NewRequest("POST", "/test", nil)
 	w := httptest.NewRecorder()
 
 	router.engine.ServeHTTP(w, req)
@@ -33,11 +50,11 @@ func TestGinRouter_RunTest(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	mockHandler := new(MockServerInterface.MockServerInterface)
-	mockHandler.On("Callback", http.StatusOK, "ok").Return()
+	mockHandler.On("TextCallback", http.StatusOK, "ok").Return()
 
 	router := NewGinRouter()
 	router.GET("/test", func(c ServerCoreApi.HandlerInterface) {
-		mockHandler.Callback(http.StatusOK, "ok")
+		mockHandler.TextCallback(http.StatusOK, "ok")
 	})
 
 	go func() {

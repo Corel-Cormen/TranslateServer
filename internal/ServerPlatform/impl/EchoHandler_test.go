@@ -11,7 +11,7 @@ func TestEchoHandler_HandleEchoMessage(t *testing.T) {
 	echoHandler := &EchoHandler{}
 	mockHandler := new(MockServerInterface.MockServerInterface)
 
-	mockHandler.On("Callback", http.StatusOK, "echo").Return()
+	mockHandler.On("TextCallback", http.StatusOK, "echo").Return()
 
 	echoHandler.Handle(mockHandler)
 
