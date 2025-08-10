@@ -6,10 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/assert"
 	"TranslateServer/internal/ServerPlatform/api"
 	"TranslateServer/internal/ServerPlatform/mock"
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGinRouter_GETRequestShouldCallHandler(t *testing.T) {

@@ -3,16 +3,17 @@ package ServerCore
 import (
 	"net/http"
 	"testing"
+
 	"TranslateServer/internal/ServerPlatform/mock"
 )
 
 func TestEchoHandler_HandleEchoMessage(t *testing.T) {
-    echoHandler := &EchoHandler{}
-    mockHandler := new(MockServerInterface.MockServerInterface)
+	echoHandler := &EchoHandler{}
+	mockHandler := new(MockServerInterface.MockServerInterface)
 
-    mockHandler.On("Callback", http.StatusOK, "echo").Return()
+	mockHandler.On("Callback", http.StatusOK, "echo").Return()
 
-    echoHandler.Handle(mockHandler)
+	echoHandler.Handle(mockHandler)
 
-    mockHandler.AssertExpectations(t)
+	mockHandler.AssertExpectations(t)
 }

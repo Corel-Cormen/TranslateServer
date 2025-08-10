@@ -82,5 +82,10 @@ func (e *EnvReader) Read(env string) (string, error) {
 	if !ok {
 		return "", fmt.Errorf("environment variable %s not found", env)
 	}
+
+	if value[0] == '"' && value[len(value)-1] == '"' {
+		value = value[1 : len(value)-1]
+	}
+
 	return value, nil
 }

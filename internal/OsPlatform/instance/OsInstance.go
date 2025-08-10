@@ -1,9 +1,10 @@
 package OsInstance
 
 import (
+	"sync"
+
 	"TranslateServer/internal/OsPlatform/api"
 	"TranslateServer/internal/OsPlatform/impl"
-	"sync"
 )
 
 var (

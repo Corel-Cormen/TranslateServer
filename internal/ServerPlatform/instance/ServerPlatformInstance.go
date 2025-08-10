@@ -2,18 +2,19 @@ package ServerPlatformInstance
 
 import (
 	"sync"
-	"TranslateServer/internal/ServerPlatform/impl"
+
 	"TranslateServer/internal/ServerPlatform/api"
+	"TranslateServer/internal/ServerPlatform/impl"
 )
 
 var (
 	serverInstance ServerCoreApi.ServerInterface
-	routerInstance ServerCoreApi.RoutherInterface
-	onceServer sync.Once
-	onceRouter sync.Once
+	routerInstance ServerCoreApi.RouterInterface
+	onceServer     sync.Once
+	onceRouter     sync.Once
 )
 
-func getRouter() ServerCoreApi.RoutherInterface {
+func getRouter() ServerCoreApi.RouterInterface {
 	onceRouter.Do(func() {
 		routerInstance = ServerCore.NewGinRouter()
 	})

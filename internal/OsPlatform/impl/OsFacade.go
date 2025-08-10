@@ -1,7 +1,9 @@
 package OsPlatformImpl
 
 import (
+	"io"
 	"os"
+	"os/exec"
 
 	"TranslateServer/internal/OsPlatform/api"
 )
@@ -27,4 +29,16 @@ func (f *OsFacade) SetEnv(name, value string) error {
 
 func (f *OsFacade) LookupEnv(env string) (string, bool) {
 	return os.LookupEnv(env)
+}
+
+func (f *OsFacade) AsyncCommand(name string, args ...string) (io.WriteCloser, io.ReadCloser, io.ReadCloser, error) {
+	c := exec.Command(name, args...)
+	stdin, _ := c.StdinPipe()
+	stdout, _ := c.StdoutPipe()
+	stderr, _ := c.StderrPipe()
+
+	if err := c.Start(); err != nil {
+		return nil, nil, nil, err
+	}
+	return stdin, stdout, stderr, nil
 }

@@ -3,9 +3,9 @@ package ServerCore
 import (
 	"testing"
 
-    "github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"TranslateServer/internal/ServerPlatform/mock"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestServer_CorrectStart(t *testing.T) {

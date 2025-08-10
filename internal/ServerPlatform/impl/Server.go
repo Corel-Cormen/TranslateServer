@@ -2,16 +2,17 @@ package ServerCore
 
 import (
 	"fmt"
+
 	"TranslateServer/internal/ServerPlatform/api"
 )
 
 type Server struct {
 	address string
 	port    int
-	router 	ServerCoreApi.RoutherInterface
+	router  ServerCoreApi.RouterInterface
 }
 
-func NewServer(address string, port int, router ServerCoreApi.RoutherInterface) ServerCoreApi.ServerInterface {
+func NewServer(address string, port int, router ServerCoreApi.RouterInterface) ServerCoreApi.ServerInterface {
 	return &Server{
 		address: address,
 		port:    port,
