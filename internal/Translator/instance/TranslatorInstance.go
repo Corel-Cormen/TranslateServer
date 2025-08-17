@@ -3,7 +3,7 @@ package TranslatorInstance
 import (
 	"sync"
 
-	"TranslateServer/internal/OsPlatform"
+	"TranslateServer/internal/Supervisor/instance"
 	"TranslateServer/internal/Translator/api"
 	"TranslateServer/internal/Translator/impl"
 )
@@ -16,7 +16,7 @@ var (
 
 func GetTranslatorInstance() TranslatorApi.TranslatorInterface {
 	onceTranslatorInstance.Do(func() {
-		vocabularyManagerInstance = TranslatorImpl.NewVocabularyAdapterManager(OsPlatform.GetOsInstance())
+		vocabularyManagerInstance = TranslatorImpl.NewVocabularyAdapterManager(SupervisorInstance.GetSupervisorInstance())
 		translatorInstance = TranslatorImpl.NewTranslatorManager(vocabularyManagerInstance)
 	})
 	return translatorInstance

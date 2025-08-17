@@ -22,41 +22,33 @@ func NewEnvReader(envFilePath string, osInterface OsPlatformApi.OsInterface) Con
 }
 
 func (e *EnvReader) loadEnv() error {
-
 	errStatus := error(nil)
-	file, err := e.osInterface.OpenFile(e.envFilePath)
+
+	fileContent, err := e.osInterface.ReadFile(e.envFilePath)
 	if err != nil {
-		errStatus = fmt.Errorf("failed to open env file: %w", err)
+		errStatus = fmt.Errorf("failed to read env file: %w", err)
 	}
-	defer file.Close()
 
 	if errStatus == nil {
-		fileContent, err := file.Read()
-		if err != nil {
-			errStatus = fmt.Errorf("failed to read env file: %w", err)
-		}
+		lineCount := bytes.Count(fileContent, []byte{'\n'})
+		envParts := strings.SplitN(string(fileContent), "\n", lineCount)
 
-		if errStatus == nil {
-			lineCount := bytes.Count(fileContent, []byte{'\n'})
-			envParts := strings.SplitN(string(fileContent), "\n", lineCount)
+		for _, line := range envParts {
+			line = strings.TrimSpace(line)
 
-			for _, line := range envParts {
-				line = strings.TrimSpace(line)
-
-				parts := strings.SplitN(line, "=", 2)
-				if len(parts) == 2 {
-					name := strings.TrimSpace(parts[0])
-					value := strings.TrimSpace(parts[1])
-					if err := e.osInterface.SetEnv(name, value); err != nil {
-						errStatus = fmt.Errorf("failed to set env variable %s: %w", name, err)
-					}
-				} else {
-					errStatus = fmt.Errorf("invalid env line: %s", line)
+			parts := strings.SplitN(line, "=", 2)
+			if len(parts) == 2 {
+				name := strings.TrimSpace(parts[0])
+				value := strings.TrimSpace(parts[1])
+				if err := e.osInterface.SetEnv(name, value); err != nil {
+					errStatus = fmt.Errorf("failed to set env variable %s: %w", name, err)
 				}
+			} else {
+				errStatus = fmt.Errorf("invalid env line: %s", line)
+			}
 
-				if errStatus != nil {
-					break
-				}
+			if errStatus != nil {
+				break
 			}
 		}
 	}

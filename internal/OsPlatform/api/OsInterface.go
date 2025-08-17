@@ -1,11 +1,21 @@
 package OsPlatformApi
 
-import "io"
+import (
+	"io"
+)
+
+type ProcessProp struct {
+	Pid int
+	In  io.WriteCloser
+	Out io.ReadCloser
+	Err io.ReadCloser
+}
 
 type OsInterface interface {
 	FileExist(path string) bool
-	OpenFile(path string) (FileInterface, error)
-	SetEnv(name, value string) error
+	ReadFile(path string) ([]byte, error)
+	SetEnv(name string, value string) error
 	LookupEnv(env string) (string, bool)
-	AsyncCommand(name string, args ...string) (io.WriteCloser, io.ReadCloser, io.ReadCloser, error)
+	AsyncCommand(name string, args ...string) (ProcessProp, error)
+	GetProcess(pid int) (ProcessInterface, error)
 }

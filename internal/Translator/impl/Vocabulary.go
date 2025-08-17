@@ -16,8 +16,6 @@ type Vocabulary struct {
 	Vocab   string
 
 	in      io.WriteCloser
-	out     io.ReadCloser
-	log     io.ReadCloser
 	scanner *bufio.Scanner
 }
 
@@ -50,13 +48,7 @@ func (v *Vocabulary) RegisterInput(closer io.WriteCloser) error {
 }
 
 func (v *Vocabulary) RegisterOutput(closer io.ReadCloser) error {
-	v.out = closer
-	v.scanner = bufio.NewScanner(v.out)
-	return nil
-}
-
-func (v *Vocabulary) RegisterLog(closer io.ReadCloser) error {
-	v.log = closer
+	v.scanner = bufio.NewScanner(closer)
 	return nil
 }
 

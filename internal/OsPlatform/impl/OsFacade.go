@@ -1,7 +1,6 @@
 package OsPlatformImpl
 
 import (
-	"io"
 	"os"
 	"os/exec"
 
@@ -15,12 +14,8 @@ func (f *OsFacade) FileExist(path string) bool {
 	return err == nil && !os.IsNotExist(err) && !os.IsPermission(err)
 }
 
-func (f *OsFacade) OpenFile(path string) (OsPlatformApi.FileInterface, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	return NewFileFacade(file), nil
+func (f *OsFacade) ReadFile(path string) ([]byte, error) {
+	return os.ReadFile(path)
 }
 
 func (f *OsFacade) SetEnv(name, value string) error {
@@ -31,14 +26,32 @@ func (f *OsFacade) LookupEnv(env string) (string, bool) {
 	return os.LookupEnv(env)
 }
 
-func (f *OsFacade) AsyncCommand(name string, args ...string) (io.WriteCloser, io.ReadCloser, io.ReadCloser, error) {
+func (f *OsFacade) AsyncCommand(name string, args ...string) (OsPlatformApi.ProcessProp, error) {
+	processProp := OsPlatformApi.ProcessProp{}
 	c := exec.Command(name, args...)
 	stdin, _ := c.StdinPipe()
 	stdout, _ := c.StdoutPipe()
 	stderr, _ := c.StderrPipe()
 
-	if err := c.Start(); err != nil {
-		return nil, nil, nil, err
+	err := c.Start()
+	if err == nil {
+		processProp.Pid = c.Process.Pid
+		processProp.In = stdin
+		processProp.Out = stdout
+		processProp.Err = stderr
+
+		go func() {
+			_ = c.Wait()
+		}()
 	}
-	return stdin, stdout, stderr, nil
+
+	return processProp, err
+}
+
+func (f *OsFacade) GetProcess(pid int) (OsPlatformApi.ProcessInterface, error) {
+	proc, err := os.FindProcess(pid)
+	if err == nil {
+		return NewProcessFacade(proc), nil
+	}
+	return nil, err
 }

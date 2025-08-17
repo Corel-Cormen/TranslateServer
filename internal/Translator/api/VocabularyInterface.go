@@ -14,6 +14,5 @@ type VocabularyInterface interface {
 	Translate(text string) (string, error)
 	RegisterInput(closer io.WriteCloser) error
 	RegisterOutput(closer io.ReadCloser) error
-	RegisterLog(closer io.ReadCloser) error
 	Unregister() error
 }

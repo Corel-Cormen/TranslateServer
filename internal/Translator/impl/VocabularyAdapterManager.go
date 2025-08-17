@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"TranslateServer/internal/OsPlatform/api"
+	"TranslateServer/internal/Supervisor/api"
 	"TranslateServer/internal/Translator/api"
 )
 
@@ -14,12 +14,12 @@ type VocabularyObject struct {
 }
 
 type VocabularyAdapterManager struct {
-	osInterface    OsPlatformApi.OsInterface
-	vocabularyList []VocabularyObject
+	supervisorInterface SupervisorApi.SupervisorInterface
+	vocabularyList      []VocabularyObject
 }
 
-func NewVocabularyAdapterManager(osPlatform OsPlatformApi.OsInterface) TranslatorApi.VocabularyAdapterManagerInterface {
-	return &VocabularyAdapterManager{osInterface: osPlatform}
+func NewVocabularyAdapterManager(supervisorInterface SupervisorApi.SupervisorInterface) TranslatorApi.VocabularyAdapterManagerInterface {
+	return &VocabularyAdapterManager{supervisorInterface: supervisorInterface, vocabularyList: []VocabularyObject{}}
 }
 
 func (m *VocabularyAdapterManager) checkIsSubscribe(vocabularyInterface TranslatorApi.VocabularyInterface) bool {
@@ -33,21 +33,10 @@ func (m *VocabularyAdapterManager) checkIsSubscribe(vocabularyInterface Translat
 	return result
 }
 
-func (m *VocabularyAdapterManager) verifyInputFiles(vocabularyInterface TranslatorApi.VocabularyInterface) bool {
-	vocabularyProperties := vocabularyInterface.GetProperties()
-	return m.osInterface.FileExist(vocabularyProperties.Decoder) &&
-		m.osInterface.FileExist(vocabularyProperties.Model) &&
-		m.osInterface.FileExist(vocabularyProperties.Vocab)
-}
-
 func (m *VocabularyAdapterManager) Subscribe(vocabularyInterface TranslatorApi.VocabularyInterface) error {
 	err := error(nil)
 	if !m.checkIsSubscribe(vocabularyInterface) {
-		if m.verifyInputFiles(vocabularyInterface) {
-			m.vocabularyList = append(m.vocabularyList, VocabularyObject{vocabulary: vocabularyInterface, isInit: false})
-		} else {
-			err = errors.New(vocabularyInterface.GetId() + "configuration files not found")
-		}
+		m.vocabularyList = append(m.vocabularyList, VocabularyObject{vocabulary: vocabularyInterface, isInit: false})
 	} else {
 		err = errors.New(vocabularyInterface.GetId() + " already subscribed")
 	}
@@ -59,18 +48,13 @@ func (m *VocabularyAdapterManager) Init() error {
 	for idx := range m.vocabularyList {
 		if !m.vocabularyList[idx].isInit {
 			vocabProp := m.vocabularyList[idx].vocabulary.GetProperties()
-			stdIn, stdOut, stdErr, cmdErr := m.osInterface.AsyncCommand(
-				vocabProp.Decoder,
-				"-m", vocabProp.Model,
-				"-v", vocabProp.Vocab, vocabProp.Vocab,
-			)
+			channel, cmdErr := m.supervisorInterface.InitVocabTaskChannel(
+				m.vocabularyList[idx].vocabulary.GetId(), vocabProp.Decoder, vocabProp.Model, vocabProp.Vocab)
 
 			if cmdErr == nil {
-				if cmdErr = m.vocabularyList[idx].vocabulary.RegisterInput(stdIn); cmdErr == nil {
-					if cmdErr = m.vocabularyList[idx].vocabulary.RegisterOutput(stdOut); cmdErr == nil {
-						if cmdErr = m.vocabularyList[idx].vocabulary.RegisterLog(stdErr); cmdErr == nil {
-							m.vocabularyList[idx].isInit = true
-						}
+				if cmdErr = m.vocabularyList[idx].vocabulary.RegisterInput(channel.In); cmdErr == nil {
+					if cmdErr = m.vocabularyList[idx].vocabulary.RegisterOutput(channel.Out); cmdErr == nil {
+						m.vocabularyList[idx].isInit = true
 					}
 				}
 			}

@@ -1,9 +1,10 @@
 package MockOsPlatformApi
 
 import (
+	"io"
+
 	"TranslateServer/internal/OsPlatform/api"
 	"github.com/stretchr/testify/mock"
-	"io"
 )
 
 type MockOsInterface struct {
@@ -15,12 +16,12 @@ func (m *MockOsInterface) FileExist(path string) bool {
 	return args.Bool(0)
 }
 
-func (m *MockOsInterface) OpenFile(path string) (OsPlatformApi.FileInterface, error) {
+func (m *MockOsInterface) ReadFile(path string) ([]byte, error) {
 	args := m.Called(path)
-	return args.Get(0).(OsPlatformApi.FileInterface), args.Error(1)
+	return args.Get(0).([]byte), args.Error(1)
 }
 
-func (m *MockOsInterface) SetEnv(name, value string) error {
+func (m *MockOsInterface) SetEnv(name string, value string) error {
 	args := m.Called(name, value)
 	return args.Error(0)
 }
@@ -38,23 +39,30 @@ func stringSliceToInterfaceSlice(ss []string) []interface{} {
 	return out
 }
 
-func (m *MockOsInterface) AsyncCommand(name string, args ...string) (io.WriteCloser, io.ReadCloser, io.ReadCloser, error) {
+func (m *MockOsInterface) AsyncCommand(name string, args ...string) (OsPlatformApi.ProcessProp, error) {
 	callArgs := append([]interface{}{name}, stringSliceToInterfaceSlice(args)...)
 	mockArgs := m.Called(callArgs...)
 
-	var stdin io.WriteCloser
-	var stdout io.ReadCloser
-	var stderr io.ReadCloser
+	processProp := OsPlatformApi.ProcessProp{}
 
-	if mockArgs.Get(0) != nil {
-		stdin = mockArgs.Get(0).(io.WriteCloser)
+	if mockArgs.Get(0) == nil {
+		processProp.Pid = mockArgs.Get(0).(int)
 	}
 	if mockArgs.Get(1) != nil {
-		stdout = mockArgs.Get(1).(io.ReadCloser)
+		processProp.In = mockArgs.Get(1).(io.WriteCloser)
 	}
 	if mockArgs.Get(2) != nil {
-		stderr = mockArgs.Get(2).(io.ReadCloser)
+		processProp.Out = mockArgs.Get(2).(io.ReadCloser)
+	}
+	if mockArgs.Get(3) != nil {
+		processProp.Err = mockArgs.Get(3).(io.ReadCloser)
 	}
 
-	return stdin, stdout, stderr, mockArgs.Error(3)
+	return processProp, mockArgs.Error(4)
+
+}
+
+func (m *MockOsInterface) GetProcess(pid int) (OsPlatformApi.ProcessInterface, error) {
+	args := m.Called(pid)
+	return args.Get(0).(OsPlatformApi.ProcessInterface), args.Error(1)
 }
