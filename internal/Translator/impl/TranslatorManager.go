@@ -1,9 +1,10 @@
 package TranslatorImpl
 
 import (
+	"fmt"
+
 	"TranslateServer/internal/Config/api"
 	"TranslateServer/internal/Translator/api"
-	"fmt"
 )
 
 type TranslatorManager struct {

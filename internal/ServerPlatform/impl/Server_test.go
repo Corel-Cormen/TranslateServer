@@ -15,7 +15,7 @@ func TestServer_CorrectStart(t *testing.T) {
 
 	mockTranslator := new(MockTranslator.MockTranslatorInterface)
 	mockRouter := new(MockServerInterface.MockRouterInterface)
-	supervisorMock := new(MockSupervisorApi.MockSupervisorApi)
+	supervisorMock := new(MockSupervisorApi.MockSupervisor)
 
 	mockRouter.On("GET", "/echo", mock.AnythingOfType("func(ServerCoreApi.HandlerInterface)")).Return()
 	mockRouter.On("GET", "/metric", mock.AnythingOfType("func(ServerCoreApi.HandlerInterface)")).Return()

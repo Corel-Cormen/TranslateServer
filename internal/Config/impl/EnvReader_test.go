@@ -2,7 +2,6 @@ package ConfigCore
 
 import (
 	"errors"
-	//"errors"
 	"testing"
 
 	"TranslateServer/internal/OsPlatform/mock"

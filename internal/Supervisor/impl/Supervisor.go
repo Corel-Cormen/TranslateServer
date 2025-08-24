@@ -73,12 +73,12 @@ func (super *Supervisor) GetMetric() []SupervisorApi.ChannelStatus {
 
 		proc, _ := super.osInterface.GetProcess(task.processProp.Pid)
 		if err := proc.Signal(0); err != nil {
-			fmt.Println("[", task.id, "] error sending signal: ", err)
+			fmt.Println("[", task.id, "] error sending signal:", err)
 			channelStatus.Status = SupervisorApi.DEFECT
 		} else {
 			data, err := super.osInterface.ReadFile(fmt.Sprintf("/proc/%d/comm", task.processProp.Pid))
 			if err != nil {
-				fmt.Println("[", task.id, "] error reading file: ", err)
+				fmt.Println("[", task.id, "] error reading file:", err)
 				channelStatus.Status = SupervisorApi.NOT_FOUND
 			} else {
 				procName := strings.TrimSpace(string(data))

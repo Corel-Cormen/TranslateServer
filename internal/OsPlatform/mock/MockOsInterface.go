@@ -1,8 +1,6 @@
 package MockOsPlatformApi
 
 import (
-	"io"
-
 	"TranslateServer/internal/OsPlatform/api"
 	"github.com/stretchr/testify/mock"
 )
@@ -42,24 +40,7 @@ func stringSliceToInterfaceSlice(ss []string) []interface{} {
 func (m *MockOsInterface) AsyncCommand(name string, args ...string) (OsPlatformApi.ProcessProp, error) {
 	callArgs := append([]interface{}{name}, stringSliceToInterfaceSlice(args)...)
 	mockArgs := m.Called(callArgs...)
-
-	processProp := OsPlatformApi.ProcessProp{}
-
-	if mockArgs.Get(0) == nil {
-		processProp.Pid = mockArgs.Get(0).(int)
-	}
-	if mockArgs.Get(1) != nil {
-		processProp.In = mockArgs.Get(1).(io.WriteCloser)
-	}
-	if mockArgs.Get(2) != nil {
-		processProp.Out = mockArgs.Get(2).(io.ReadCloser)
-	}
-	if mockArgs.Get(3) != nil {
-		processProp.Err = mockArgs.Get(3).(io.ReadCloser)
-	}
-
-	return processProp, mockArgs.Error(4)
-
+	return mockArgs.Get(0).(OsPlatformApi.ProcessProp), mockArgs.Error(1)
 }
 
 func (m *MockOsInterface) GetProcess(pid int) (OsPlatformApi.ProcessInterface, error) {
