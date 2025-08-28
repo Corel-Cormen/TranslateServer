@@ -67,6 +67,37 @@ The Docker image is designed to work the same as the native Linux system. You ca
 docker run -p 5000:5000 --gpus all -v %cd%\\build\\out\\TranslateServer:/data translate_server_image:latest /data/main
 ```
 
+## End points
+
+### Echo handler
+Test endpoint - returns a message confirming the correct operation of the server.
+```
+GET /echo HTTP/1.1
+Host: localhost:5000
+```
+
+### Metrinc handler
+Returns server metrics (translator operation status)
+```
+GET /metric HTTP/1.1
+Host: localhost:5000
+```
+
+### Translate handler
+Translates the submitted text into the selected language.
+```
+POST /translate HTTP/1.1
+Host: localhost:5000
+Content-Type: application/json
+```
+required json struct
+```json
+{
+	"lang": string: id_translator,
+	"text": string: test_to_translate
+}
+```
+
 ---------------------------------------------------
 # Notatki
 

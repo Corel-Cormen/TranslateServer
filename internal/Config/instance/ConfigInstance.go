@@ -5,7 +5,7 @@ import (
 
 	"TranslateServer/internal/Config/api"
 	"TranslateServer/internal/Config/impl"
-	"TranslateServer/internal/OsPlatform"
+	"TranslateServer/internal/OsPlatform/instance"
 )
 
 var (
@@ -20,7 +20,7 @@ var (
 func getEnvReader() ConfigApi.EnvReaderInterface {
 	onceEnvReaderInstance.Do(func() {
 		envFilePath := ".env"
-		envReaderInstance = ConfigCore.NewEnvReader(envFilePath, OsPlatform.GetOsInstance())
+		envReaderInstance = ConfigCore.NewEnvReader(envFilePath, OsInstance.GetOsInstance())
 	})
 	return envReaderInstance
 }

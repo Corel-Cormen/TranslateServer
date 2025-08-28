@@ -3,10 +3,12 @@ package TranslatorImpl
 import (
 	"bytes"
 	"errors"
+	"github.com/stretchr/testify/mock"
 	"io"
 	"testing"
 
 	"TranslateServer/internal/OsPlatform/mock"
+	"TranslateServer/internal/SentenceFormatter/mock"
 	"TranslateServer/internal/Supervisor/api"
 	"TranslateServer/internal/Supervisor/mock"
 	"TranslateServer/internal/Translator/api"
@@ -16,7 +18,8 @@ import (
 
 func TestVocabularyAdapterManager_Subscribe_Success(t *testing.T) {
 	mockSupervisor := new(MockSupervisorApi.MockSupervisor)
-	manager := NewVocabularyAdapterManager(mockSupervisor)
+	mockSentenceFormatter := new(MockSentenceFormatter.MockSentenceFormatterInterface)
+	manager := NewVocabularyAdapterManager(mockSupervisor, mockSentenceFormatter)
 
 	mockVocab1 := new(MockTranslator.MockVocabularyInterface)
 	mockVocab1.On("GetId").Return("v1")
@@ -38,7 +41,8 @@ func TestVocabularyAdapterManager_Subscribe_Success(t *testing.T) {
 
 func TestVocabularyAdapterManager_Subscribe_VocabIsSubscribed(t *testing.T) {
 	mockSupervisor := new(MockSupervisorApi.MockSupervisor)
-	manager := NewVocabularyAdapterManager(mockSupervisor)
+	mockSentenceFormatter := new(MockSentenceFormatter.MockSentenceFormatterInterface)
+	manager := NewVocabularyAdapterManager(mockSupervisor, mockSentenceFormatter)
 
 	mockVocab1 := new(MockTranslator.MockVocabularyInterface)
 	mockVocab1.On("GetId").Return("v1")
@@ -60,7 +64,8 @@ func TestVocabularyAdapterManager_Subscribe_VocabIsSubscribed(t *testing.T) {
 
 func TestVocabularyAdapterManager_Init_Success(t *testing.T) {
 	mockSupervisor := new(MockSupervisorApi.MockSupervisor)
-	manager := NewVocabularyAdapterManager(mockSupervisor)
+	mockSentenceFormatter := new(MockSentenceFormatter.MockSentenceFormatterInterface)
+	manager := NewVocabularyAdapterManager(mockSupervisor, mockSentenceFormatter)
 
 	mockVocab := new(MockTranslator.MockVocabularyInterface)
 	mockVocab.On("GetId").Return("v1")
@@ -85,7 +90,8 @@ func TestVocabularyAdapterManager_Init_Success(t *testing.T) {
 
 func TestVocabularyAdapterManager_Init_SupervisorError(t *testing.T) {
 	mockSupervisor := new(MockSupervisorApi.MockSupervisor)
-	manager := NewVocabularyAdapterManager(mockSupervisor)
+	mockSentenceFormatter := new(MockSentenceFormatter.MockSentenceFormatterInterface)
+	manager := NewVocabularyAdapterManager(mockSupervisor, mockSentenceFormatter)
 
 	mockVocab := new(MockTranslator.MockVocabularyInterface)
 	mockVocab.On("GetId").Return("v1")
@@ -106,7 +112,8 @@ func TestVocabularyAdapterManager_Init_SupervisorError(t *testing.T) {
 
 func TestVocabularyAdapterManager_Init_RegisterInputError(t *testing.T) {
 	mockSupervisor := new(MockSupervisorApi.MockSupervisor)
-	manager := NewVocabularyAdapterManager(mockSupervisor)
+	mockSentenceFormatter := new(MockSentenceFormatter.MockSentenceFormatterInterface)
+	manager := NewVocabularyAdapterManager(mockSupervisor, mockSentenceFormatter)
 
 	mockVocab := new(MockTranslator.MockVocabularyInterface)
 	mockVocab.On("GetId").Return("v1")
@@ -131,7 +138,8 @@ func TestVocabularyAdapterManager_Init_RegisterInputError(t *testing.T) {
 
 func TestVocabularyAdapterManager_Init_RegisterOutputError(t *testing.T) {
 	mockSupervisor := new(MockSupervisorApi.MockSupervisor)
-	manager := NewVocabularyAdapterManager(mockSupervisor)
+	mockSentenceFormatter := new(MockSentenceFormatter.MockSentenceFormatterInterface)
+	manager := NewVocabularyAdapterManager(mockSupervisor, mockSentenceFormatter)
 
 	mockVocab := new(MockTranslator.MockVocabularyInterface)
 	mockVocab.On("GetId").Return("v1")
@@ -184,7 +192,8 @@ func TestVocabularyAdapterManager_Deinit(t *testing.T) {
 
 func TestVocabularyAdapterManager_Translate(t *testing.T) {
 	mockSupervisor := new(MockSupervisorApi.MockSupervisor)
-	manager := NewVocabularyAdapterManager(mockSupervisor)
+	mockSentenceFormatter := new(MockSentenceFormatter.MockSentenceFormatterInterface)
+	manager := NewVocabularyAdapterManager(mockSupervisor, mockSentenceFormatter)
 
 	mockVocab := new(MockTranslator.MockVocabularyInterface)
 	mockVocab.On("GetId").Return("v1")
@@ -197,7 +206,9 @@ func TestVocabularyAdapterManager_Translate(t *testing.T) {
 	require.Equal(t, "", result)
 
 	manager.(*VocabularyAdapterManager).vocabularyList[0].isInit = true
+	mockSentenceFormatter.On("PrepareInput", mock.Anything).Return("hello")
 	mockVocab.On("Translate", "hello").Return("translated", nil)
+	mockSentenceFormatter.On("CleanOutput", mock.Anything).Return("translated")
 
 	result, err = manager.Translate("v1", "hello")
 	require.NoError(t, err)
@@ -209,4 +220,5 @@ func TestVocabularyAdapterManager_Translate(t *testing.T) {
 	require.Equal(t, "", result)
 
 	mockVocab.AssertExpectations(t)
+	mockSentenceFormatter.AssertExpectations(t)
 }

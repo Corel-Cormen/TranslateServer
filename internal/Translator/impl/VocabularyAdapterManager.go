@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"TranslateServer/internal/SentenceFormatter/api"
 	"TranslateServer/internal/Supervisor/api"
 	"TranslateServer/internal/Translator/api"
 )
@@ -14,12 +15,18 @@ type VocabularyObject struct {
 }
 
 type VocabularyAdapterManager struct {
-	supervisorInterface SupervisorApi.SupervisorInterface
-	vocabularyList      []VocabularyObject
+	supervisorInterface        SupervisorApi.SupervisorInterface
+	vocabularyList             []VocabularyObject
+	sentenceFormatterInterface SentenceFormatterApi.SentenceFormatterInterface
 }
 
-func NewVocabularyAdapterManager(supervisorInterface SupervisorApi.SupervisorInterface) TranslatorApi.VocabularyAdapterManagerInterface {
-	return &VocabularyAdapterManager{supervisorInterface: supervisorInterface, vocabularyList: []VocabularyObject{}}
+func NewVocabularyAdapterManager(supervisorInterface SupervisorApi.SupervisorInterface,
+	sentenceFormatterInterface SentenceFormatterApi.SentenceFormatterInterface) TranslatorApi.VocabularyAdapterManagerInterface {
+	return &VocabularyAdapterManager{
+		supervisorInterface:        supervisorInterface,
+		vocabularyList:             []VocabularyObject{},
+		sentenceFormatterInterface: sentenceFormatterInterface,
+	}
 }
 
 func (m *VocabularyAdapterManager) checkIsSubscribe(vocabularyInterface TranslatorApi.VocabularyInterface) bool {
@@ -89,7 +96,11 @@ func (m *VocabularyAdapterManager) Translate(id string, text string) (string, er
 	for idx := range m.vocabularyList {
 		if m.vocabularyList[idx].vocabulary.GetId() == id {
 			if m.vocabularyList[idx].isInit {
+				text = m.sentenceFormatterInterface.PrepareInput(text)
 				result, err = m.vocabularyList[idx].vocabulary.Translate(text)
+				if err == nil {
+					result = m.sentenceFormatterInterface.CleanOutput(result)
+				}
 			} else {
 				err = fmt.Errorf("translator is not init")
 			}
